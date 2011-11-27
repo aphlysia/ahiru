@@ -1,0 +1,63 @@
+1. open 2 consol terminals (we call them as terminal A and terminal B)
+
+2. on the terminal A
+$ python
+>>> from manager import Ahiru
+>>> from user import User
+>>> taro = User('taro', 'a', 'b', '127.0.0.1', 2009)
+>>> ahiru = Ahiru(taro)
+>>> book1 = ahiru.create('book1') # create a book 'book1'
+>>> ahiru.quack() # start quacking
+>>> act1 = ahiru.put(book1, 'hello, world!') # put a data on book1
+>>> ahiru.get(book1, act1).data
+>>> hanako = User('hanako', 'z')
+>>> ahiru.books[book1].members
+>>> ahiru.addMember(book1, hanako) # share book1 with hanako
+>>> ahiru.books[book1].members
+
+3. on the terminal B
+$ python
+>>> from manager import Ahiru
+>>> from user import User
+>>> hanako = User('hanako', 'z', 'bb', '127.0.0.1', 2010)
+>>> ahiru = Ahiru(hanako)
+>>> from book import Book
+>>> ahiru.join(Book.bookID(User('taro', 'a'), 'book1'), '127.0.0.1', 2009)
+>>> book1 = Book.bookID(User('taro', 'a'), 'book1')
+>>> ahiru.books[book1].members
+>>> ahiru.books[book1].versions
+>>> ahiru.quack()
+>>> ahiru.books[book1].versions
+>>> ahiru.get(book1, (User('taro', 'a').ID(), 1)).data
+>>> ahiru.put(book1, 'hi')
+
+4. on the terminal A
+>>> ahiru.books[book1].versions
+>>> ahiru.get(book1, (hanako.ID(), 1)).data
+>>> ahiru.stop()
+>>> exit()
+
+5. on the terminal B
+>>> ahiru.put(book1, 123456)
+>>> ahiru.update(book1, 'hello, duck world!', (User('taro', 'a').ID(), 1))
+>>> ahiru.get(book1, (hanako.ID(), 2)).data
+>>> ahiru.get(book1, (hanako.ID(), 3)).data
+>>> acts = ahiru.getLatests(book1, (taro.ID(), 1))
+>>> acts
+>>> acts[0].data
+
+6. on the terminal A
+$ python
+>>> from manager import Ahiru
+>>> from user import User
+>>> from book import Book
+>>> taro = User('taro', 'a', 'b', '127.0.0.1', 2009)
+>>> ahiru = Ahiru(taro)
+>>> book1 = Book.bookID(taro, 'book1')
+>>> ahiru.open(book1)
+>>> ahiru.quack()
+>>> ahiru.books[book1].versions
+>>> hanako = User('hanako', 'z')
+>>> ahiru.get(book1, (hanako.ID(), 2)).data
+>>> ahiru.getLatests(book1, (taro.ID(), 1))[0].data
+
