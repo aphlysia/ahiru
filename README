@@ -1,0 +1,6 @@
+ahiru is a p2p datastore.
+
+requirements:
+ python 3.2 
+ tornado
+
