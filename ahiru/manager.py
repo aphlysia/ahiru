@@ -123,7 +123,11 @@ def _updateActions(versions, user, book, lock, address):
 				_body += '&no=' + escape.url_escape(str(no))
 				_body += '&authorID=' + escape.url_escape(userID)
 				response = http_client.fetch(address + '/action', method = 'POST', body = _body)
-				action = escape.json_decode(response.body)
+				try:
+					action = escape.json_decode(response.body)
+				except ValueError:
+					print('ValueError')
+					continue
 				if action['parent'] is not None:
 					action['parent'] = tuple(action['parent'])
 				if action['root'] is not None:
@@ -176,8 +180,10 @@ class _JoinClient(threading.Thread):
 			response = http_client.fetch(address + '/join', method = 'POST', body = _body)
 			b = escape.json_decode(response.body)
 			owner = User(**b['owner'])
-			book = Book(owner, b['title'], b['signature'], b['createdAt'], self.path, quack = True)
+			lock.acquire()
+			book = Book.copyCover(owner, b['title'], b['signature'], b['createdAt'], self.path)
 			books[book.ID()] = book
+			lock.release()
 			
 			response = http_client.fetch(address + '/members', method = 'POST', body = _body)
 			members = escape.json_decode(response.body)
@@ -185,6 +191,8 @@ class _JoinClient(threading.Thread):
 		except tornado.httpclient.HTTPError as e:
 			#todo: log
 			print("Error:" + str(e))
+		except ValueError:
+			print('ValueError')
 	
 class _QuackClient(threading.Thread):
 	def __init__(self, user, book, lock, whoToAsk = None, connectAll = False, maxConnection = 3, askAction = True, askMember = True):
@@ -234,6 +242,8 @@ class _QuackClient(threading.Thread):
 				#todo: log
 				print("Error:" + str(e))
 				pass
+			except ValueError:
+				print('ValueError')
 			
 
 class _QuackServer(threading.Thread):
@@ -427,14 +437,12 @@ class Ahiru:
 	def create(self, title):
 		if Book.bookID(self.user, title) in self.books:
 			raise BookIDExists()
-		b = Book()
-		b.create(self.user, title, self.path)
+		b = Book.create(self.user, title, self.path)
 		self.books[b.ID()] = b
 		return b.ID()
 
 	def open(self, ID):
-		b = Book()
-		b.open(ID, self.path)
+		b = Book.open(ID, self.path)
 		self.books[ID] = b
 
 	def quack(self):
@@ -482,7 +490,7 @@ class Ahiru:
 		assert isinstance(comer, User)
 		self.books[bookID].addMember(self.user, comer)
 
-	def join(self, bookID, host, port):
-		client = _JoinClient(self.user, self.books, self.lock, bookID, host, port)
+	def join(self, bookID, host, port, path = ''):
+		client = _JoinClient(self.user, self.books, self.lock, bookID, host, port, path)
 		client.start()
 

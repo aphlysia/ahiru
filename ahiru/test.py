@@ -88,27 +88,22 @@ class BookT(unittest.TestCase):
 		book = Book()
 	
 	def test_create(self):
-		book = Book()
 		taro = User('taro', 'abcde', '123456')
 		hanako = User('hanako', '123@#')
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 		self.assert_(True)
 		
 	def test_open(self):
-		book = Book()
 		taro = User('taro', 'abcde', '123456')
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 
-		book2 = Book()
-		book2.open(title = 'testBook', owner = taro, path = '.')
+		book2 = Book.open(title = 'testBook', owner = taro, path = '.')
 		
-		book = Book()
-		self.assertRaises(InvalidBookFile, book.open, 'testBook_kjhsadfiuywerbklfdsakljhsdfiuyadsfkjh', '~')
+		self.assertRaises(InvalidBookFile, Book.open, 'testBook_kjhsadfiuywerbklfdsakljhsdfiuyadsfkjh', '~')
 	
 	def test_get(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 		ldata = [1, 2, 3]
 		comment = "hello i'm taro"
 		ID = book.put(taro, ldata, comment)
@@ -121,8 +116,7 @@ class BookT(unittest.TestCase):
 	
 	def test_getLatests(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 		ldata = [1, 2, 3]
 		comment = "hello i'm taro"
 		ID = book.put(taro, ldata, comment)
@@ -133,9 +127,8 @@ class BookT(unittest.TestCase):
 	
 	def test_put(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
 		hanako = User('hanako', '123@#')
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 
 		ldata = [1, 2, 3]
 		comment = "hello i'm taro"
@@ -155,8 +148,7 @@ class BookT(unittest.TestCase):
 	
 	def test_update(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 		ldata = [1, 2, 3]
 		comment = "hello i'm taro"
 		ID = book.put(taro, ldata, comment)
@@ -201,8 +193,7 @@ class BookT(unittest.TestCase):
 
 	def test_addMember(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 
 		hanako = User('hanako', '123@#')
 		jiro = User('jiro', 'oiuwre')
@@ -212,8 +203,7 @@ class BookT(unittest.TestCase):
 
 	def test_isMember(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 		hanako = User('hanako', '123@#')
 		jiro = User('jiro', 'oiuwre')
 		book.addMember(taro, jiro)
@@ -223,8 +213,7 @@ class BookT(unittest.TestCase):
 
 	def test_putAction(self):
 		taro = User('taro', 'abcde', '123456')
-		book = Book()
-		book.create(taro, 'testBook', '.')
+		book = Book.create(taro, 'testBook', '.')
 		action = Action.new(bookID = book.ID(), user = taro, no = 1, act = Action.Insert, data = 'hoge')
 		
 		ID = book.putAction(taro, action.toDict())

@@ -16,29 +16,17 @@ class NoParent(Exception): pass
 class ActionExists(Exception): pass
 
 class Book:
-	def __init__(self, owner = None, title = None, signature = None, createdAt = None, path = '', quack = True):
-		assert owner is None or isinstance(owner, User)
-		self.owner = owner
-		self.title = title
-		if owner is None:
-			self.members = {}
-			self.versions = {}
-		else:
-			self.members = {owner.ID(): owner}
-			self.versions = {owner.ID(): 0}
-		self.actions = {}
-		self.signature = signature
-		self.createdAt = createdAt
-		self.path = path
-		self.latests = {}
-		self.quack = quack  # whether or not to do quack
+	def __init__(self):
+		pass
 
-	def create(self, owner, title, path = '', quack = True):
+	@classmethod
+	def create(cls, owner, title, path = '', quack = True):
 		assert isinstance(owner, User)
 		assert isinstance(title, str) and title != ''
 		assert isinstance(path, str)
 		assert isinstance(quack, bool)
 
+		self = cls()
 		self.owner = owner
 		self.title = title
 		self.members = {owner.ID(): owner}
@@ -46,19 +34,46 @@ class Book:
 		self.actions = {}
 		self.signature = owner.encrypt(title)
 		self.createdAt = time.time()
-		self.path = path
 		self.quack = quack
 		self.latests = {}
-
+		self.path = path
 		self._save()
 
-	def open(self, bookID = None, owner = None, title = None, path = ''):
+		return self
+
+	@classmethod
+	def copyCover(cls, owner, title, signature, createdAt, path = '', quack = True):
+		assert isinstance(owner, User)
+		assert isinstance(title, str) and title != ''
+		assert isinstance(signature, str)
+		assert isinstance(createdAt, float)
+		assert isinstance(path, str)
+		assert isinstance(quack, bool)
+
+		self = cls()
+		self.owner = owner
+		self.title = title
+		self.members = {owner.ID(): owner}
+		self.versions = {owner.ID(): 0}
+		self.actions = {}
+		self.signature = signature
+		self.createdAt = createdAt
+		self.latests = {}
+		self.quack = quack
+		self.path = path
+		self._save()
+
+		return self
+		
+	@classmethod
+	def open(cls, bookID = None, owner = None, title = None, path = ''):
 		assert bookID is not None or owner is not None and title is not None
 		assert owner is not None or isinstance(owner, User)
 		assert isinstance(path, str)
 
+		self = cls()
 		if bookID is None:
-			bookID = self.__class__.bookID(owner, title)
+			bookID = cls.bookID(owner, title)
 		self.path = path
 		filename = os.path.join(path, str(bookID) + '.book.pkl')
 		if not os.path.isfile(filename):
@@ -76,6 +91,8 @@ class Book:
 		self.createdAt = c['createdAt']
 		self.latests = c['latests']
 		self.quack = c['quack']
+
+		return self
 
 	def _save(self):
 		title = self.title
@@ -105,7 +122,7 @@ class Book:
 		return hashlib.sha256(str((owner.ID(), title)).encode('utf8')).hexdigest()
 
 	def ID(self):
-		return self.bookID(self.owner, self.title)
+		return self.__class__.bookID(self.owner, self.title)
 
 	def setQuack(self):
 		self.quack = True
