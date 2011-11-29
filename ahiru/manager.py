@@ -61,7 +61,7 @@ def _updateMembers(members, user, book, lock, address):
 	while ids:
 		id = ids.pop(0)
 		newcomer = User(**members[id])
-		if newcomer.approverID in book.members and User.isValidInvitation(book.members[newcomer.approverID], newcomer, book.ID()):
+		if newcomer.approverID in book.members and User.isValidInvitation(book.members[newcomer.approverID], newcomer, book.getID()):
 			book.members[id] = newcomer
 			book.versions[id] = 0
 			freezeCount = 0
@@ -84,7 +84,7 @@ def _updateMembers(members, user, book, lock, address):
 			_body += '&port=' + escape.url_escape(str(user.port))
 			_body += '&invitation=' + escape.url_escape(user.invitation if user.invitation is not None else ' ')
 			_body += '&approverID=' + escape.url_escape(user.approverID if user.approverID is not None else ' ')
-			_body += '&bookID=' + escape.url_escape(book.ID())
+			_body += '&bookID=' + escape.url_escape(book.getID())
 			_body += '&password=' + escape.url_escape(_authCode(user))
 			response = http_client.fetch(address + '/newmembers', method = 'POST', body = _body)
 			break
@@ -102,7 +102,7 @@ def _updateActions(versions, user, book, lock, address):
 			_body += '&port=' + escape.url_escape(str(user.port))
 			_body += '&invitation=' + escape.url_escape(user.invitation if user.invitation is not None else ' ')
 			_body += '&approverID=' + escape.url_escape(user.approverID if user.approverID is not None else ' ')
-			_body += '&bookID=' + escape.url_escape(book.ID())
+			_body += '&bookID=' + escape.url_escape(book.getID())
 			_body += '&password=' + escape.url_escape(_authCode(user))
 			response = http_client.fetch(address + '/newactions', method = 'POST', body = _body)
 			break
@@ -118,7 +118,7 @@ def _updateActions(versions, user, book, lock, address):
 				_body += '&port=' + escape.url_escape(str(user.port))
 				_body += '&invitation=' + escape.url_escape(user.invitation if user.invitation is not None else ' ')
 				_body += '&approverID=' + escape.url_escape(user.approverID if user.approverID is not None else ' ')
-				_body += '&bookID=' + escape.url_escape(book.ID())
+				_body += '&bookID=' + escape.url_escape(book.getID())
 				_body += '&password=' + escape.url_escape(_authCode(user))
 				_body += '&no=' + escape.url_escape(str(no))
 				_body += '&authorID=' + escape.url_escape(userID)
@@ -182,7 +182,7 @@ class _JoinClient(threading.Thread):
 			owner = User(**b['owner'])
 			lock.acquire()
 			book = Book.copyCover(owner, b['title'], b['signature'], b['createdAt'], self.path)
-			books[book.ID()] = book
+			books[book.getID()] = book
 			lock.release()
 			
 			response = http_client.fetch(address + '/members', method = 'POST', body = _body)
@@ -225,7 +225,7 @@ class _QuackClient(threading.Thread):
 		_body += '&port=' + escape.url_escape(str(self.user.port))
 		_body += '&invitation=' + escape.url_escape(self.user.invitation if self.user.invitation is not None else ' ')
 		_body += '&approverID=' + escape.url_escape(self.user.approverID if self.user.approverID is not None else ' ')
-		_body += '&bookID=' + escape.url_escape(self.book.ID())
+		_body += '&bookID=' + escape.url_escape(self.book.getID())
 		_body += '&password=' + escape.url_escape(_authCode(self.user))
 		for user in whoToAsk:
 			try:
@@ -435,11 +435,11 @@ class Ahiru:
 		self.newActionFunc = f
 
 	def create(self, title):
-		if Book.bookID(self.user, title) in self.books:
+		if Book.ID(self.user, title) in self.books:
 			raise BookIDExists()
 		b = Book.create(self.user, title, self.path)
-		self.books[b.ID()] = b
-		return b.ID()
+		self.books[b.getID()] = b
+		return b.getID()
 
 	def open(self, ID):
 		b = Book.open(ID, self.path)

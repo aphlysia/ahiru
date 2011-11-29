@@ -73,7 +73,7 @@ class Book:
 
 		self = cls()
 		if bookID is None:
-			bookID = cls.bookID(owner, title)
+			bookID = cls.ID(owner, title)
 		self.path = path
 		filename = os.path.join(path, str(bookID) + '.book.pkl')
 		if not os.path.isfile(filename):
@@ -97,7 +97,7 @@ class Book:
 	def _save(self):
 		title = self.title
 		path = self.path
-		filename = os.path.join(path, str(self.ID()) + '.book.pkl')
+		filename = os.path.join(path, str(self.getID()) + '.book.pkl')
 
 		c = {
 			'owner': self.owner,
@@ -116,13 +116,13 @@ class Book:
 		file.close()
 
 	@classmethod
-	def bookID(cls, owner, title):
+	def ID(cls, owner, title):
 		assert isinstance(owner, User)
 		assert isinstance(title, str)
 		return hashlib.sha256(str((owner.ID(), title)).encode('utf8')).hexdigest()
 
-	def ID(self):
-		return self.__class__.bookID(self.owner, self.title)
+	def getID(self):
+		return self.__class__.ID(self.owner, self.title)
 
 	def setQuack(self):
 		self.quack = True
@@ -149,7 +149,7 @@ class Book:
 			return True
 		if user.approverID is not None and user.approverID in self.members:
 			# a newcomer but has not yet been appended to members dictionary
-			return User.isValidInvitation(self.members[user.approverID], user, self.ID())
+			return User.isValidInvitation(self.members[user.approverID], user, self.getID())
 		return False
 
 	def putAction(self, user, actionDict):
@@ -158,7 +158,7 @@ class Book:
 			raise InvalidActionDictionary()
 		if actionDict['parent'] is not None and actionDict['parent'] not in self.actions:
 			raise NoParent()
-		action = Action.newFromDict(self.ID(), user, **actionDict)
+		action = Action.newFromDict(self.getID(), user, **actionDict)
 		if action.ID() in self.actions:
 			raise ActionExists()
 		self.actions[action.ID()] = action
@@ -185,7 +185,7 @@ class Book:
 		self.versions[user.ID()] += 1
 		no = self.versions[user.ID()]
 		sign = user.encrypt(str(data))
-		action = Action.new(self.ID(), user, no, Action.Insert, data, comment) 
+		action = Action.new(self.getID(), user, no, Action.Insert, data, comment) 
 		self.actions[action.ID()] = action
 		self.latests[action.ID()] = [action]
 
@@ -207,7 +207,7 @@ class Book:
 		self.versions[user.ID()] += 1
 		no = self.versions[user.ID()]
 		sign = user.encrypt(str(data))
-		action = Action.new(self.ID(), user, no, Action.Update, data, comment, parent) 
+		action = Action.new(self.getID(), user, no, Action.Update, data, comment, parent) 
 		self.actions[action.ID()] = action
 		latests = self.latests[action.root]
 		for i in range(len(latests)):
@@ -225,7 +225,7 @@ class Book:
 		assert isinstance(comer, User)
 		if approver.ID() not in self.members:
 			raise NoRight()
-		approver.invite(comer, self.ID())
+		approver.invite(comer, self.getID())
 		self.members[comer.ID()] = comer
 		self.versions[comer.ID()] = 0
 

@@ -22,13 +22,14 @@ $ python
 >>> hanako = User('hanako', 'z', 'bb', '127.0.0.1', 2010)
 >>> ahiru = Ahiru(hanako)
 >>> from book import Book
->>> ahiru.join(Book.bookID(User('taro', 'a'), 'book1'), '127.0.0.1', 2009)
->>> book1 = Book.bookID(User('taro', 'a'), 'book1')
+>>> taro = User('taro', 'a')
+>>> book1 = Book.ID(taro, 'book1')
+>>> ahiru.join(book1), '127.0.0.1', 2009)
 >>> ahiru.books[book1].members
 >>> ahiru.books[book1].versions
 >>> ahiru.quack()
 >>> ahiru.books[book1].versions
->>> ahiru.get(book1, (User('taro', 'a').ID(), 1)).data
+>>> ahiru.get(book1, (taro.ID(), 1)).data
 >>> ahiru.put(book1, 'hi')
 
 4. on the terminal A
@@ -39,7 +40,7 @@ $ python
 
 5. on the terminal B
 >>> ahiru.put(book1, 123456)
->>> ahiru.update(book1, 'hello, duck world!', (User('taro', 'a').ID(), 1))
+>>> ahiru.update(book1, 'hello, duck world!', (taro.ID(), 1))
 >>> ahiru.get(book1, (hanako.ID(), 2)).data
 >>> ahiru.get(book1, (hanako.ID(), 3)).data
 >>> acts = ahiru.getLatests(book1, (taro.ID(), 1))
@@ -53,11 +54,17 @@ $ python
 >>> from book import Book
 >>> taro = User('taro', 'a', 'b', '127.0.0.1', 2009)
 >>> ahiru = Ahiru(taro)
->>> book1 = Book.bookID(taro, 'book1')
+>>> book1 = Book.ID(taro, 'book1')
 >>> ahiru.open(book1)
 >>> ahiru.quack()
 >>> ahiru.books[book1].versions
 >>> hanako = User('hanako', 'z')
 >>> ahiru.get(book1, (hanako.ID(), 2)).data
 >>> ahiru.getLatests(book1, (taro.ID(), 1))[0].data
+>>> ahiru.update(book1, 'hello, duck world!!!', (taro.ID(), 1))
+>>> ahiru.getLatests(book1, (hanako.ID(), 2))[0].data
+>>> ahiru.getLatests(book1, (hanako.ID(), 2))[1].data
+>>> ahiru.update(book1, 'hello, duck world~~~!!!', (taro.ID(), 1))
+>>> ahiru.getLatests(book1, (hanako.ID(), 2))[0].data
+>>> ahiru.getLatests(book1, (hanako.ID(), 2))[1].data
 
